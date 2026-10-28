@@ -8,9 +8,10 @@ static const char *const TAG = "kaku.protocol";
 
 static constexpr uint32_t TX_T_US = 260;
 static constexpr uint32_t TX_HEADER_HIGH_US = TX_T_US;
-static constexpr uint32_t TX_HEADER_LOW_US = TX_T_US * 10 + (TX_T_US / 2);  // ~2730us (10.5T)
+static constexpr uint32_t TX_HEADER_LOW_US =
+    TX_T_US * 10 + (TX_T_US / 2); // ~2730us (10.5T)
 static constexpr uint32_t TX_STOP_HIGH_US = TX_T_US;
-static constexpr uint32_t TX_STOP_LOW_US = TX_T_US * 40;  // 10400us
+static constexpr uint32_t TX_STOP_LOW_US = TX_T_US * 40; // 10400us
 void KakuProtocol::one(remote_base::RemoteTransmitData *dst) const {
   // '1' => 1T high, 5T low, 1T high, 1T low
   dst->item(TX_T_US, TX_T_US * 5);
@@ -27,7 +28,8 @@ void KakuProtocol::sync(remote_base::RemoteTransmitData *dst) const {
   dst->item(TX_HEADER_HIGH_US, TX_HEADER_LOW_US);
 }
 
-void KakuProtocol::encode(remote_base::RemoteTransmitData *dst, const KakuData &data) {
+void KakuProtocol::encode(remote_base::RemoteTransmitData *dst,
+                          const KakuData &data) {
   dst->set_carrier_frequency(0);
 
   // Sync / start pulse
@@ -94,7 +96,8 @@ optional<KakuData> KakuProtocol::decode(remote_base::RemoteReceiveData src) {
   };
 
   // Search through buffer for sync pulse: 1T high, ~10.44T low
-  // In real RF receivers, 1T high is ~150-500us, and 10.44T low is ~1800-4000us.
+  // In real RF receivers, 1T high is ~150-500us, and 10.44T low is
+  // ~1800-4000us.
   bool found_sync = false;
   uint32_t period = 260;
 
@@ -118,7 +121,8 @@ optional<KakuData> KakuProtocol::decode(remote_base::RemoteReceiveData src) {
   if (!found_sync)
     return {};
 
-  // Dynamic thresholds based on measured sync pulse period (Randy Simons algorithm)
+  // Dynamic thresholds based on measured sync pulse period (Randy Simons
+  // algorithm)
   uint32_t max_1t = std::max<uint32_t>(period * 3, 600);
   uint32_t min_5t = period * 2;
   uint32_t max_5t = period * 8;
@@ -187,7 +191,7 @@ optional<KakuData> KakuProtocol::decode(remote_base::RemoteReceiveData src) {
       return {};
     if (is_dim) {
       out.state = true;
-      out.dim_level = 1;  // Marker for dim presence
+      out.dim_level = 1; // Marker for dim presence
     } else {
       out.state = bit;
     }
@@ -211,14 +215,17 @@ optional<KakuData> KakuProtocol::decode(remote_base::RemoteReceiveData src) {
       out.dim_level = (out.dim_level << 1) | (bit ? 1 : 0);
     }
   }
-
-  return out;
+  return {out};
 }
 
 void KakuProtocol::dump(const KakuData &data) {
-  ESP_LOGI(TAG, "Received KAKU: address=0x%07" PRIX32 " unit=%u group=%s state=%s dim_level=%u",
-           data.address, data.unit, data.group ? "true" : "false", data.state ? "ON" : "OFF", data.dim_level);
+  ESP_LOGI(TAG,
+           "Received KAKU: address=0x%07" PRIX32
+           " unit=%u group=%s state=%s dim_level=%u",
+           data.address, data.unit, data.group ? "true" : "false",
+           data.state ? "ON" : "OFF", data.dim_level);
 }
 
-}  // namespace kaku
-}  // namespace esphome
+} // namespace kaku
+
+} // namespace esphome

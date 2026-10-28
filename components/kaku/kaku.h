@@ -1,7 +1,7 @@
 #pragma once
 
-#include "esphome/core/component.h"
 #include "esphome/components/remote_base/remote_base.h"
+#include "esphome/core/component.h"
 
 #include <cinttypes>
 
@@ -16,13 +16,13 @@ struct KakuData {
   uint8_t dim_level;
 
   bool operator==(const KakuData &rhs) const {
-    return address == rhs.address && unit == rhs.unit && group == rhs.group && state == rhs.state &&
-           dim_level == rhs.dim_level;
+    return address == rhs.address && unit == rhs.unit && group == rhs.group &&
+           state == rhs.state && dim_level == rhs.dim_level;
   }
 };
 
 class KakuProtocol : public remote_base::RemoteProtocol<KakuData> {
- public:
+public:
   void one(remote_base::RemoteTransmitData *dst) const;
   void zero(remote_base::RemoteTransmitData *dst) const;
   void sync(remote_base::RemoteTransmitData *dst) const;
@@ -36,8 +36,9 @@ using KakuBinarySensor = remote_base::RemoteReceiverBinarySensor<KakuProtocol>;
 using KakuTrigger = remote_base::RemoteReceiverTrigger<KakuProtocol>;
 using KakuDumper = remote_base::RemoteReceiverDumper<KakuProtocol>;
 
-template<typename... Ts> class KakuAction : public remote_base::RemoteTransmitterActionBase<Ts...> {
- public:
+template <typename... Ts>
+class KakuAction : public remote_base::RemoteTransmitterActionBase<Ts...> {
+public:
   TEMPLATABLE_VALUE(uint32_t, address)
   TEMPLATABLE_VALUE(uint8_t, unit)
   TEMPLATABLE_VALUE(bool, group)
@@ -55,9 +56,9 @@ template<typename... Ts> class KakuAction : public remote_base::RemoteTransmitte
     KakuProtocol().encode(dst, data);
   }
 
- protected:
+protected:
   bool is_dim_{false};
 };
 
-}  // namespace kaku
-}  // namespace esphome
+} // namespace kaku
+} // namespace esphome
