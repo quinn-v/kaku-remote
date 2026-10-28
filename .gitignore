@@ -1,0 +1,8 @@
+# ESPHome build artifacts
+.esphome/
+.venv/
+build/
+*.pyc
+__pycache__/
+*.o
+*.a
