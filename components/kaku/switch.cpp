@@ -19,8 +19,7 @@ void KakuSwitch::write_state(bool state) {
       .state = state,
       .dim_level = 0,
   };
-
-  this->transmitter_->transmit<KakuProtocol>(data, this->repeats_, 0);
+  this->transmit_<KakuProtocol>(data, this->repeats_, 0);
   this->publish_state(state);
 }
 
