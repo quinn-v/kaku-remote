@@ -5,31 +5,57 @@
 
 #include <cinttypes>
 
-namespace esphome {
-namespace kaku {
+namespace esphome::kaku
+{
 
-struct KakuData {
-  uint32_t address;
-  uint8_t unit;
-  bool group;
-  bool state;
-  uint8_t dim_level;
+struct KakuData
+{
+    uint32_t address;
+    uint8_t unit;
+    bool group;
+    bool state;
+    uint8_t dim_level;
 
-  bool operator==(const KakuData &rhs) const {
-    return address == rhs.address && unit == rhs.unit && group == rhs.group &&
-           state == rhs.state && dim_level == rhs.dim_level;
-  }
+    bool
+    operator==(const KakuData &rhs) const = default;
 };
 
-class KakuProtocol : public remote_base::RemoteProtocol<KakuData> {
-public:
-  void one(remote_base::RemoteTransmitData *dst) const;
-  void zero(remote_base::RemoteTransmitData *dst) const;
-  void sync(remote_base::RemoteTransmitData *dst) const;
+class KakuProtocol : public remote_base::RemoteProtocol<KakuData>
+{
+  public:
+    void
+    one(remote_base::RemoteTransmitData *dst) const;
 
-  void encode(remote_base::RemoteTransmitData *dst, const KakuData &data);
-  optional<KakuData> decode(remote_base::RemoteReceiveData src);
-  void dump(const KakuData &data);
+    void
+    zero(remote_base::RemoteTransmitData *dst) const;
+
+    void
+    sync(remote_base::RemoteTransmitData *dst) const;
+
+    void
+    encode(remote_base::RemoteTransmitData *dst, const KakuData &data);
+
+    optional<KakuData>
+    decode(remote_base::RemoteReceiveData src);
+
+    void
+    dump(const KakuData &data);
+
+  private:
+    bool
+    decode_bits(remote_base::RemoteReceiveData &src,
+        uint32_t period,
+        uint8_t num_bits,
+        uint32_t &out_data) const;
+
+    bool
+    decode_bit(remote_base::RemoteReceiveData &src, uint32_t period, bool &bit_val, bool &is_dim) const;
+
+    bool
+    find_sync(remote_base::RemoteReceiveData &src, uint32_t &period) const;
+
+    void
+    encode_bits(remote_base::RemoteTransmitData *dst, uint32_t data, uint8_t num_bits) const;
 };
 
 using KakuBinarySensor = remote_base::RemoteReceiverBinarySensor<KakuProtocol>;
@@ -37,28 +63,35 @@ using KakuTrigger = remote_base::RemoteReceiverTrigger<KakuProtocol>;
 using KakuDumper = remote_base::RemoteReceiverDumper<KakuProtocol>;
 
 template <typename... Ts>
-class KakuAction : public remote_base::RemoteTransmitterActionBase<Ts...> {
-public:
-  TEMPLATABLE_VALUE(uint32_t, address)
-  TEMPLATABLE_VALUE(uint8_t, unit)
-  TEMPLATABLE_VALUE(bool, group)
-  TEMPLATABLE_VALUE(bool, state)
-  TEMPLATABLE_VALUE(uint8_t, dim_level)
-  void set_is_dim(bool is_dim) { this->is_dim_ = is_dim; }
+class KakuAction : public remote_base::RemoteTransmitterActionBase<Ts...>
+{
+  public:
+    TEMPLATABLE_VALUE(uint32_t, address)
+    TEMPLATABLE_VALUE(uint8_t, unit)
+    TEMPLATABLE_VALUE(bool, group)
+    TEMPLATABLE_VALUE(bool, state)
+    TEMPLATABLE_VALUE(uint8_t, dim_level)
 
-  void encode(remote_base::RemoteTransmitData *dst, Ts... x) override {
-    KakuData data{};
-    data.address = this->address_.value(x...);
-    data.unit = this->unit_.value(x...);
-    data.group = this->group_.value(x...);
-    data.state = this->state_.value(x...);
-    data.dim_level = this->is_dim_ ? this->dim_level_.value(x...) : 0;
-    KakuProtocol().encode(dst, data);
-  }
+    void
+    set_is_dim(bool is_dim)
+    {
+        this->is_dim_ = is_dim;
+    }
 
-protected:
-  bool is_dim_{false};
+    void
+    encode(remote_base::RemoteTransmitData *dst, Ts... x) override
+    {
+        KakuData data{};
+        data.address = this->address_.value(x...);
+        data.unit = this->unit_.value(x...);
+        data.group = this->group_.value(x...);
+        data.state = this->state_.value(x...);
+        data.dim_level = this->is_dim_ ? this->dim_level_.value(x...) : 0;
+        KakuProtocol().encode(dst, data);
+    }
+
+  protected:
+    bool is_dim_{false};
 };
 
-} // namespace kaku
-} // namespace esphome
+} // namespace esphome::kaku

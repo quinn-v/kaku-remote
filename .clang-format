@@ -1,0 +1,33 @@
+BasedOnStyle: LLVM
+
+IndentWidth: 4
+
+ColumnLimit: 104
+
+BreakBeforeBraces: Allman
+
+InsertBraces: true
+
+AlwaysBreakAfterReturnType: All
+AllowShortFunctionsOnASingleLine: Inline
+PenaltyReturnTypeOnItsOwnLine: 30
+
+AlignAfterOpenBracket: DontAlign
+LambdaBodyIndentation: OuterScope
+BinPackArguments: false
+BinPackParameters: false
+AllowAllArgumentsOnNextLine: false
+
+PenaltyBreakAssignment: 500
+PenaltyBreakBeforeFirstCallParameter: 0
+PenaltyExcessCharacter: 1000
+
+IndentCaseLabels: true
+IndentCaseBlocks: false
+IndentRequiresClause: false
+
+BreakConstructorInitializers: AfterColon
+PackConstructorInitializers: CurrentLine
+AlwaysBreakTemplateDeclarations: Yes
+
+SeparateDefinitionBlocks: Always
