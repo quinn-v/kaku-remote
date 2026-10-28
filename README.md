@@ -1,6 +1,6 @@
 # ESPHome KlikAanKlikUit (KAKU) External Component
 
-An ESPHome external component implementing the **KlikAanKlikUit (KAKU) / CoCo** 433.92 MHz RF protocol for transmitting and receiving commands via ESPHome's standard `remote_transmitter` and `remote_receiver` components, along with a dedicated `kaku` switch platform.
+An ESPHome external component implementing the **KlikAanKlikUit (KAKU) / CoCo** 433.92 MHz RF protocol for transmitting and receiving commands via ESPHome's standard `remote_transmitter` and `remote_receiver` components.
 
 ---
 
@@ -14,7 +14,7 @@ external_components:
     components: [ kaku ]
     refresh: 1d
 
-# Include empty component declaration so the protocol registers with remote_base
+# Activate component to register kaku protocol with remote_base
 kaku:
 ```
 
@@ -50,25 +50,36 @@ remote_receiver:
 
 ---
 
-## Usage
+## Usage Examples
 
-### 1. Dedicated Switch Platform
+### 1. Switch Using ESPHome Template Switch
 
-The easiest way to control KAKU sockets and relays:
+In ESPHome, RF switches are typically configured as `template` switches triggering the transmitter action:
 
 ```yaml
 switch:
-  - platform: kaku
+  - platform: template
     name: "Living Room Lamp"
-    address: 0x01A2B3  # 26-bit transmitter address
-    unit: 0            # Unit / button index (0-15)
-    group: false       # Optional, default: false
-    repeats: 8         # Number of frame repetitions (default: 8)
+    optimistic: true
+    turn_on_action:
+      - remote_transmitter.transmit_kaku:
+          address: 0x01A2B3  # 26-bit address
+          unit: 0            # Unit index (0-15)
+          state: true
+          repeat:
+            times: 8
+    turn_off_action:
+      - remote_transmitter.transmit_kaku:
+          address: 0x01A2B3
+          unit: 0
+          state: false
+          repeat:
+            times: 8
 ```
 
 ### 2. Transmitter Action (`remote_transmitter.transmit_kaku`)
 
-Use in automations, scripts, or template switches:
+Use anywhere in automations, scripts, or buttons:
 
 ```yaml
 # Turn on a specific unit
@@ -106,7 +117,7 @@ binary_sensor:
 
 ### 4. Automation Trigger & Protocol Dumper
 
-Log incoming packets:
+Log incoming packets in the log output:
 ```yaml
 remote_receiver:
   pin: GPIO19
@@ -114,7 +125,7 @@ remote_receiver:
     - kaku
 ```
 
-Trigger actions on any KAKU packet:
+Trigger automations when any KAKU packet is received:
 ```yaml
 remote_receiver:
   pin: GPIO19
